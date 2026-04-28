@@ -13,19 +13,18 @@ st.set_page_config(
 
 # ==============================================================================
 # CONFIGURAÇÃO DOS MÓDULOS E TABELAS
-# Preencha aqui os códigos das tabelas para cada módulo
 # ==============================================================================
 MAPA_MODULOS = {
-    "Compras": ["SA2", "SA5", "SY1", "SAH"],
-    "Estoque": ["SB1", "SBM", "NNR", "SB5", "SAH", "SBF"],
-    "Faturamento": ["SA1", "SF4", "SE4", "SA3", "SX5"],
-    "Financeiro": ["SA6", "SED", "SEB", "SEC", "SEE"],
-    "Contábil": ["CT1", "CTH", "CTJ", "CTM", "CTL"],
-    "Fiscal": ["SF4", "SFB", "SFA", "SYD", "SFE"],
-    "Loja": ["SLB", "SLR", "SLV", "ST9", "SLG"],
-    "Ativo Fixo": ["SN1", "SN2", "SN0", "SNG", "SNF"],
-    "Gestão de Contratos": ["CN1", "CNB", "CNC", "CND"],
-    "PCP": ["SH1", "SG1", "SH3", "SH4", "SHB"]
+    "Compras": ["SA2010", "SC7010", "SC1010"],
+    "Estoque": ["SB1010", "SB2010", "SD1010"],
+    "Faturamento": ["SF2010", "SD2010", "SC5010"],
+    "Financeiro": ["SE1010", "SE2010", "SE5010"],
+    "Contábil": ["CT1010", "CT2010"],
+    "Fiscal": ["SF1010", "SFT010"],
+    "Loja": ["SL1010", "SL2010"],
+    "Ativo Fixo": ["SN1010", "SN3010"],
+    "Gestão de Contratos": ["CN1010", "CN2010"],
+    "PCP": ["SH1010", "SG1010"]
 }
 # ==============================================================================
 
@@ -43,25 +42,33 @@ with st.sidebar:
     with col_pass:
         senha = st.text_input("Senha", type="password")
     
-    st.divider()
-    st.header("📍 Localização e Período")
-    col_empresa, col_filial = st.columns(2)
-    with col_empresa:
-        company = st.text_input("Empresa", placeholder="01")
-    with col_filial:
-        branch = st.text_input("Filial", placeholder="010101")
+    # Campo Filial movido para Configurações de Acesso
+    branch = st.text_input("Filial", placeholder="Ex: 010101")
+    
+    # Campo Empresa comentado conforme solicitado
+    # col_empresa, _ = st.columns(2)
+    # with col_empresa:
+    #     company = st.text_input("Empresa", placeholder="01")
+    company = "" # Definido como vazio para não quebrar a lógica da API
 
-    d_padrao_inicio = datetime.now() - timedelta(days=7)
+    st.divider()
+    
+    # Título alterado para "📅 Período"
+    st.header("📅 Período")
+    
+    # Data "De" configurada para 30 dias antes de hoje
+    d_padrao_inicio = datetime.now() - timedelta(days=30)
+    d_padrao_fim = datetime.now()
+
     col_data1, col_data2 = st.columns(2)
     with col_data1:
         data_inicio = st.date_input("De", d_padrao_inicio, format="DD/MM/YYYY")
     with col_data2:
-        data_fim = st.date_input("Até", datetime.now(), format="DD/MM/YYYY")
+        data_fim = st.date_input("Até", d_padrao_fim, format="DD/MM/YYYY")
 
     st.divider()
     st.header("📂 Seleção de Módulos")
     
-    # Campo de Seleção de Módulos (Substituiu o Text Area)
     modulos_selecionados = st.multiselect(
         "Selecione um ou mais módulos:",
         options=list(MAPA_MODULOS.keys()),
@@ -74,17 +81,17 @@ with st.sidebar:
 
 # 3. Lógica de Processamento
 if btn_gerar:
+    # Validação: Retirada a obrigatoriedade de Branch (Filial) e Company (Empresa)
     if not url_raiz or not usuario or not senha or not modulos_selecionados:
-        st.error("❌ Preencha os campos obrigatórios: URL, Usuário, Senha e selecione ao menos um Módulo.")
+        st.error("❌ Preencha os campos obrigatórios: URL, Usuário, Senha e selecione um Módulo.")
     elif data_inicio > data_fim:
         st.error("❌ A data 'De' não pode ser maior que 'Até'.")
     else:
-        # CONSTRUÇÃO DA LISTA DE TABELAS BASEADO NOS MÓDULOS SELECIONADOS
+        # CONSTRUÇÃO DA LISTA DE TABELAS
         lista_tabelas = []
         for mod in modulos_selecionados:
             lista_tabelas.extend(MAPA_MODULOS[mod])
         
-        # Remover duplicatas caso uma tabela esteja em dois módulos
         lista_tabelas = list(set(lista_tabelas))
 
         # Construção da URL
@@ -121,11 +128,10 @@ if btn_gerar:
                         if debug_mode:
                             st.write(f"Debug {tabela_codigo}:", dados_api)
 
-                        # Tratamento para extrair o NOME retornado pela API
                         if isinstance(dados_api, list) and len(dados_api) > 0:
                             dados_api = dados_api[0]
 
-                        # Busca exaustiva pela tag de nome
+                        # Busca pela tag de nome
                         api_nome = None
                         for chave in ['nome', 'Nome', 'NOME', 'description', 'desc']:
                             if chave in dados_api and dados_api[chave]:
@@ -182,5 +188,5 @@ if btn_gerar:
             csv = df.to_csv(index=False).encode('utf-8')
             st.download_button("📥 Baixar CSV", csv, "relatorio_uso.csv", "text/csv", use_container_width=True)
         else:
-            if not btn_gerar:
-                st.info("Selecione os módulos e clique em Gerar.")
+            if btn_gerar:
+                st.info("Nenhum dado encontrado para os parâmetros selecionados.")
