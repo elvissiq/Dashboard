@@ -34,7 +34,7 @@ st.markdown("---")
 
 # 2. Barra Lateral
 with st.sidebar:
-    st.header("🔑 Configurações de Acesso")
+    st.header("🔑 Configurações de Acesso_01")
     url_raiz = st.text_input("URL Raiz do Servidor", placeholder="https://IP:Porta/rest")
     
     col_user, col_pass = st.columns(2)
