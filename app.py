@@ -15,7 +15,7 @@ st.set_page_config(
 # CONFIGURAÇÃO DOS MÓDULOS E TABELAS (Versão Simplificada)
 # ==============================================================================
 MAPA_MODULOS = {
-    "Compras": ["SA2", "SA5", "SY1", "SAH"],
+    "Compras": ["SA2", "SA5", "SY1", "SAH", "SC1"],
     "Estoque": ["SB1", "SBM", "NNR", "SB5", "SAH", "SBF"],
     "Faturamento": ["SA1", "SF4", "SE4", "SA3", "SX5"],
     "Financeiro": ["SA6", "SED", "SEB", "SEC", "SEE"],
@@ -56,9 +56,11 @@ with st.sidebar:
     # Seção Período com ícone de calendário
     st.header("📅 Período")
     
-    # Data inicial: 30 dias antes da data de hoje
+    # --- AJUSTE DE DATAS ---
+    # Data inicial: 30 dias antes de hoje
     d_padrao_inicio = datetime.now() - timedelta(days=30)
-    d_padrao_fim = datetime.now()
+    # Data final: Hoje + 1 dia
+    d_padrao_fim = datetime.now() + timedelta(days=1)
 
     col_data1, col_data2 = st.columns(2)
     with col_data1:
