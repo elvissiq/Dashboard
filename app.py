@@ -12,19 +12,19 @@ st.set_page_config(
 )
 
 # ==============================================================================
-# CONFIGURAÇÃO DOS MÓDULOS E TABELAS
+# CONFIGURAÇÃO DOS MÓDULOS E TABELAS (Versão Simplificada)
 # ==============================================================================
 MAPA_MODULOS = {
-    "Compras": ["SA2010", "SC7010", "SC1010"],
-    "Estoque": ["SB1010", "SB2010", "SD1010"],
-    "Faturamento": ["SF2010", "SD2010", "SC5010"],
-    "Financeiro": ["SE1010", "SE2010", "SE5010"],
-    "Contábil": ["CT1010", "CT2010"],
-    "Fiscal": ["SF1010", "SFT010"],
-    "Loja": ["SL1010", "SL2010"],
-    "Ativo Fixo": ["SN1010", "SN3010"],
-    "Gestão de Contratos": ["CN1010", "CN2010"],
-    "PCP": ["SH1010", "SG1010"]
+    "Compras": ["SA2", "SA5", "SY1", "SAH"],
+    "Estoque": ["SB1", "SBM", "NNR", "SB5", "SAH", "SBF"],
+    "Faturamento": ["SA1", "SF4", "SE4", "SA3", "SX5"],
+    "Financeiro": ["SA6", "SED", "SEB", "SEC", "SEE"],
+    "Contábil": ["CT1", "CTH", "CTJ", "CTM", "CTL"],
+    "Fiscal": ["SF4", "SFB", "SFA", "SYD", "SFE"],
+    "Loja": ["SLB", "SLR", "SLV", "ST9", "SLG"],
+    "Ativo Fixo": ["SN1", "SN2", "SN0", "SNG", "SNF"],
+    "Gestão de Contratos": ["CN1", "CNB", "CNC", "CND"],
+    "PCP": ["SH1", "SG1", "SH3", "SH4", "SHB"]
 }
 # ==============================================================================
 
@@ -42,21 +42,21 @@ with st.sidebar:
     with col_pass:
         senha = st.text_input("Senha", type="password")
     
-    # Campo Filial movido para Configurações de Acesso
+    # Campo Filial dentro do grupo de Acesso
     branch = st.text_input("Filial", placeholder="Ex: 010101")
     
     # Campo Empresa comentado conforme solicitado
     # col_empresa, _ = st.columns(2)
     # with col_empresa:
     #     company = st.text_input("Empresa", placeholder="01")
-    company = "" # Definido como vazio para não quebrar a lógica da API
+    company = "" # Mantido interno para não quebrar a chamada da API
 
     st.divider()
     
-    # Título alterado para "📅 Período"
+    # Seção Período com ícone de calendário
     st.header("📅 Período")
     
-    # Data "De" configurada para 30 dias antes de hoje
+    # Data inicial: 30 dias antes da data de hoje
     d_padrao_inicio = datetime.now() - timedelta(days=30)
     d_padrao_fim = datetime.now()
 
@@ -70,7 +70,7 @@ with st.sidebar:
     st.header("📂 Seleção de Módulos")
     
     modulos_selecionados = st.multiselect(
-        "Selecione um ou mais módulos:",
+        "Selecione os módulos:",
         options=list(MAPA_MODULOS.keys()),
         help="As tabelas serão carregadas automaticamente conforme o módulo selecionado."
     )
@@ -81,20 +81,18 @@ with st.sidebar:
 
 # 3. Lógica de Processamento
 if btn_gerar:
-    # Validação: Retirada a obrigatoriedade de Branch (Filial) e Company (Empresa)
     if not url_raiz or not usuario or not senha or not modulos_selecionados:
         st.error("❌ Preencha os campos obrigatórios: URL, Usuário, Senha e selecione um Módulo.")
     elif data_inicio > data_fim:
         st.error("❌ A data 'De' não pode ser maior que 'Até'.")
     else:
-        # CONSTRUÇÃO DA LISTA DE TABELAS
+        # CONSTRUÇÃO DA LISTA DE TABELAS ÚNICAS
         lista_tabelas = []
         for mod in modulos_selecionados:
             lista_tabelas.extend(MAPA_MODULOS[mod])
-        
         lista_tabelas = list(set(lista_tabelas))
 
-        # Construção da URL
+        # Construção da URL Final
         raiz_limpa = url_raiz.strip().rstrip('/')
         endpoint_fixo = "/api/retail/v1/zStampAPI"
         url_completa = f"{raiz_limpa}{endpoint_fixo}"
@@ -128,10 +126,11 @@ if btn_gerar:
                         if debug_mode:
                             st.write(f"Debug {tabela_codigo}:", dados_api)
 
+                        # Tratamento do JSON (Objeto ou Lista)
                         if isinstance(dados_api, list) and len(dados_api) > 0:
                             dados_api = dados_api[0]
 
-                        # Busca pela tag de nome
+                        # Prioridade para o campo "nome"
                         api_nome = None
                         for chave in ['nome', 'Nome', 'NOME', 'description', 'desc']:
                             if chave in dados_api and dados_api[chave]:
@@ -144,7 +143,7 @@ if btn_gerar:
                         resultados.append({
                             "Nome Visual": nome_exibicao, 
                             "Quantidade": int(quantidade),
-                            "Código Original": tabela_codigo
+                            "Código Técnico": tabela_codigo
                         })
                     
                     elif response.status_code == 401:
@@ -187,6 +186,3 @@ if btn_gerar:
             
             csv = df.to_csv(index=False).encode('utf-8')
             st.download_button("📥 Baixar CSV", csv, "relatorio_uso.csv", "text/csv", use_container_width=True)
-        else:
-            if btn_gerar:
-                st.info("Nenhum dado encontrado para os parâmetros selecionados.")
