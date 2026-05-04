@@ -35,7 +35,7 @@ Default lStamp    := .T.
 Default lInsDt    := .T.
  
     //Se veio algum alias e ele existir na base
-    cQry := "SELECT X2_CHAVE FROM " + RetSQLName('SX2')
+    cQry := "SELECT X2_CHAVE FROM " + RetSQLName('SX2') + " WHERE D_E_L_E_T_ <> '*'"
 	PlsQuery(cQry, _cAlias)
     DbSelectArea(_cAlias)
     Count to nTotal
