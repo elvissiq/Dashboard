@@ -17,7 +17,7 @@ st.set_page_config(
 MAPA_MODULOS = {
     "Compras": ["SA2", "SA5", "SY1", "SAH", "SC1"],
     "Estoque": ["SB1", "SBM", "NNR", "SB5", "SAH", "SBF"],
-    "Faturamento": ["SA1", "SF4", "SE4", "SA3", "SX5"],
+    "Faturamento": ["SA1", "SF4", "SE4", "SA3"],
     "Financeiro": ["SA6", "SED", "SEB", "SEC", "SEE"],
     "Contábil": ["CT1", "CTH", "CTJ", "CTM", "CTL"],
     "Fiscal": ["SF4", "SFB", "SFA", "SYD", "SFE"],

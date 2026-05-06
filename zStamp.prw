@@ -24,7 +24,7 @@ Local lOkStamp  := .F.
 Local lOkInsDt  := .F.
 Local nFor      := 0
 
-    aTabelas := {   "SA2", "SA5", "SY1", "SAH", "SC1","SB1", "SBM", "NNR", "SB5", "SAH", "SBF","SA1", "SF4", "SE4", "SA3", "SX5","SA6", "SED", "SEB", "SEC", "SEE",;
+    aTabelas := {   "SA2", "SA5", "SY1", "SAH", "SC1","SB1", "SBM", "NNR", "SB5", "SAH", "SBF","SA1", "SF4", "SE4", "SA3","SA6", "SED", "SEB", "SEC", "SEE",;
                     "CT1", "CTH", "CTJ", "CTM", "CTL","SF4", "SFB", "SFA", "SYD", "SFE","SLB", "SLR", "SLV", "ST9", "SLG","SN1", "SN2", "SN0", "SNG","CN1","CNB",;
                     "CNC", "CND","SH1", "SG1", "SH3", "SH4", "SHB";
                 }
