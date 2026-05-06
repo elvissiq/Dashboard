@@ -22,7 +22,7 @@ MAPA_MODULOS = {
     "Contábil": ["CT1", "CTH", "CTJ", "CTM", "CTL"],
     "Fiscal": ["SF4", "SFB", "SFA", "SYD", "SFE"],
     "Loja": ["SLB", "SLR", "SLV", "ST9", "SLG"],
-    "Ativo Fixo": ["SN1", "SN2", "SN0", "SNG", "SNF"],
+    "Ativo Fixo": ["SN1", "SN2", "SN0", "SNG"],
     "Gestão de Contratos": ["CN1", "CNB", "CNC", "CND"],
     "PCP": ["SH1", "SG1", "SH3", "SH4", "SHB"]
 }

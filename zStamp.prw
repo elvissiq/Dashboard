@@ -4,88 +4,73 @@
 /*/{Protheus.doc} zStamp
 Criação de campos S_T_A_M_P_ e I_N_S_D_T
 @type user function
-@author Atilio
-@since 23/12/2024
-@param cTabAlias, Caractere, Alias da tabela (exemplo SB1)
-@param lStamp, Lógico, Se .T. tenta criar o campo S_T_A_M_P_
-@param lInsDt, Lógico, Se .T. tenta criar o campo I_N_S_D_T_
+@author Elvis Siqueira (TOTVS PE/AL)
+@since 06/05/2026
 @example
-u_zStamp("SB1")
-@obs Foi construído essa função baseado no comentário do Sangar Zucchi nesse link: https://terminaldeinformacao.com/2023/01/25/para-que-serve-os-novos-campos-s_t_a_m_p_-e-i_n_s_d_t_-e-como-utiliza-los-no-protheus/
- 
+u_zStamp() 
 /*/
 
 User Function zStamp()
 
-    FWMsgRun(, {|oSay| zCriaRows(oSay,Nil,Nil,Nil) }, "Processando", "Buscando as tabelas")
+    FWMsgRun(, {|oSay| zCriaRows(oSay) }, "Processando", "Buscando as tabelas")
 
 Return
 
-Static Function zCriaRows(oSay,cTabAlias,lStamp,lInsDt)
-Local cTabSQL     := ""
-Local cQry        := ""
-Local _cAlias     := FWTimeStamp()
-Local lOkStamp    := .F.
-Local lOkInsDt    := .F.
-Local nAtual      := 0
-Local nTotal      := 0
+Static Function zCriaRows(oSay)
+Local aTabelas  := {}
+Local lStamp    := .T.
+Local lInsDt    := .T.
+Local lOkStamp  := .F.
+Local lOkInsDt  := .F.
+Local nFor      := 0
 
-Default cTabAlias := ""
-Default lStamp    := .T.
-Default lInsDt    := .T.
- 
-    //Se veio algum alias e ele existir na base
-    cQry := "SELECT X2_CHAVE FROM " + RetSQLName('SX2') + " WHERE D_E_L_E_T_ <> '*'"
-	PlsQuery(cQry, _cAlias)
-    DbSelectArea(_cAlias)
-    Count to nTotal
+    aTabelas := {   "SA2", "SA5", "SY1", "SAH", "SC1","SB1", "SBM", "NNR", "SB5", "SAH", "SBF","SA1", "SF4", "SE4", "SA3", "SX5","SA6", "SED", "SEB", "SEC", "SEE",;
+                    "CT1", "CTH", "CTJ", "CTM", "CTL","SF4", "SFB", "SFA", "SYD", "SFE","SLB", "SLR", "SLV", "ST9", "SLG","SN1", "SN2", "SN0", "SNG","CN1","CNB",;
+                    "CNC", "CND","SH1", "SG1", "SH3", "SH4", "SHB";
+                }
 
-    (_cAlias)->(DbGoTop())
-
-	While ! (_cAlias)->(Eof())
+	For nFor := 1 To Len(aTabelas)
         
-        nAtual++
-        oSay:SetText("Tabela " + cValToChar(nAtual) + " de " + cValToChar(nTotal))
+        oSay:SetText("Tabela " + cValToChar(nFor) + " de " + cValToChar(Len(aTabelas)))
 
-        cTabAlias := (_cAlias)->X2_CHAVE
-        
-        IF TCSqlExec("SELECT * FROM " + RetSQLName(cTabAlias)) >= 0
+        IF &(aTabelas[nFor])->(FieldPos("S_T_A_M_P_")) <= 0
+
+            dbSelectArea(aTabelas[nFor])
+            
             //Valida se consegue ativar o recurso no BD
             lOkStamp    := (lStamp .And. (TCConfig('SETAUTOSTAMP = ON') == 'OK') .And. (TCConfig('SETUSEROWSTAMP = ON') == 'OK'))
             lOkInsDt    := (lInsDt .And. (TCConfig('SETAUTOINSDT = ON') == 'OK') .And. (TCConfig('SETUSEROWINSDT = ON') == 'OK'))
             If lOkStamp .Or. lOkInsDt
-    
+        
                 //Busca o nome real da tabela, exemplo SB1 => SB1010
-                cTabSQL := RetSQLName(cTabAlias)
-    
+                cTabSQL := RetSQLName(aTabelas[nFor])
+            
                 //Se a tabela já estiver aberta, fecha para depois abrir em modo exclusivo
-                If Select(cTabAlias) > 0
-                    (cTabAlias)->(DbCloseArea())
+                If Select(aTabelas[nFor]) > 0
+                    (aTabelas[nFor])->(DbCloseArea())
                 EndIf
-    
+            
                 //Tenta Abrir em modo Exclusivo
-                USE (cTabSQL) ALIAS (cTabAlias) EXCLUSIVE NEW VIA "TOPCONN"
+                USE (cTabSQL) ALIAS (aTabelas[nFor]) EXCLUSIVE NEW VIA "TOPCONN"
                 If ! NetErr()
-    
+            
                     //Aciona o Refresh na tabela
                     TCRefresh(cTabSQL)
-    
+            
                 Else
-                    FWAlertError('Tabela "' + cTabAlias + '" - não foi possível abrir em modo Exclusivo', 'Falha #1')
+                    FWAlertError('Tabela "' + aTabelas[nFor] + '" - não foi possível abrir em modo Exclusivo', 'Falha #1')
                 EndIf
-                (cTabAlias)->(DbCloseArea())
-    
+        
                 //Desativa os recursos
                 TCConfig('SETAUTOSTAMP = OFF')
                 TCConfig('SETUSEROWSTAMP = OFF')
-    
+        
             //Senão, não será possível criar os campos
             Else
                 FWAlertError('Não foi possível ativar os recursos no BD', 'Falha #2')
             EndIf
         EndIF
-	(_cAlias)->(DbSkip())
-	End
-	(_cAlias)->(DbCloseArea())
+
+	Next nFor
  
 Return
